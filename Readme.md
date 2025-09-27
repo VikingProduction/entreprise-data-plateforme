@@ -67,7 +67,7 @@ entreprise-data-platform/
 
 ```bash
 # 1. Cloner le projet
-git clone https://github.com/votre-repo/entreprise-data-platform.git
+git clone [https://github.com/votre-repo/entreprise-data-platform.git](https://github.com/VikingProduction/entreprise-data-plateforme)
 cd entreprise-data-platform
 
 # 2. Configurer
