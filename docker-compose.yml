@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: entreprise-platform-web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./config/nginx.conf:/etc/nginx/sites-available/default
+      - ./storage:/var/www/html/storage
+      - web_logs:/var/log/nginx
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=entreprise_data
+      - DB_USER=root
+      - DB_PASS=entreprise_2025
+      - INPI_USERNAME=${INPI_USERNAME}
+      - INPI_PASSWORD=${INPI_PASSWORD}
+    networks:
+      - entreprise-net
+
+  db:
+    image: mysql:8.0
+    container_name: entreprise-platform-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: entreprise_2025
+      MYSQL_DATABASE: entreprise_data
+      MYSQL_USER: entreprise_user
+      MYSQL_PASSWORD: entreprise_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - entreprise-net
+
+  collector:
+    build: .
+    container_name: entreprise-platform-collector
+    volumes:
+      - ./:/var/www/html
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=entreprise_data
+      - DB_USER=root
+      - DB_PASS=entreprise_2025
+      - INPI_USERNAME=${INPI_USERNAME}
+      - INPI_PASSWORD=${INPI_PASSWORD}
+    command: php /var/www/html/backend/cron/daily_import.php
+    networks:
+      - entreprise-net
+    profiles:
+      - collector
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: entreprise-platform-pma
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: entreprise_2025
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - entreprise-net
+    profiles:
+      - admin
+
+volumes:
+  db_data:
+  web_logs:
+
+networks:
+  entreprise-net:
+    driver: bridge

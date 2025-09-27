@@ -1,0 +1,13 @@
+# Crontab pour la plateforme de données d'entreprises
+
+# Collecte quotidienne à 2h du matin
+0 2 * * * cd /var/www/html && php backend/cron/daily_import.php >> storage/logs/cron.log 2>&1
+
+# Téléchargement des documents (tous les jours à 3h)
+0 3 * * * cd /var/www/html && php backend/cron/document_downloader.php >> storage/logs/cron.log 2>&1
+
+# Nettoyage des logs (tous les dimanches à 4h)
+0 4 * * 0 cd /var/www/html && php backend/cron/cleanup.php >> storage/logs/cron.log 2>&1
+
+# Sauvegarde de la base de données (tous les jours à 5h)
+0 5 * * * mysqldump -h localhost -u root -pentreprise_2025 entreprise_data > /var/www/html/storage/backups/db_$(date +\%Y\%m\%d).sql
