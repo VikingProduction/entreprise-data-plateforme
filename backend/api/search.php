@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// AJOUT : Inclure la classe Database AVANT les autres
+require_once __DIR__ . '/../models/Database.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Company.php';
 
@@ -86,6 +88,10 @@ try {
     echo json_encode([
         'success' => false,
         'error' => 'Erreur interne du serveur',
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'debug' => [
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]
     ]);
 }
